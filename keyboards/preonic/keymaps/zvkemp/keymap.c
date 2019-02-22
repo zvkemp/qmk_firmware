@@ -33,6 +33,20 @@ enum preonic_keycodes {
   BACKLIT
 };
 
+/* Goals
+ * [x] vim-like arrow navigation on home row
+ * [x] grave-escape
+ * [ ] pgup/pgdn/home/end 
+ *     - maybe add a layer for lower left button?
+ *     - 
+ * [ ] numpad?
+ * [ ] add more bracket pairing options
+ * [ ] double-taps:
+ *     - ;; -> :
+ *     - ;;; -> ::
+ *
+ */
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 /* Qwerty
