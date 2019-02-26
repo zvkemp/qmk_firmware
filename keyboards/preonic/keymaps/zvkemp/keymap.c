@@ -104,7 +104,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * |   ~  |   !  |   @  |   #  |   $  |   %  |   ^  |   &  |   *  |   (  |   )  |  +   |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * | Bksp |   [  |   ]  |   {  |   }  |   |  |   |  |   _  |   +  |   (  |   )  |  |   |
+ * | Bksp |   [  |   ]  |   {  |   }  |   |  |   |  |   (  |   )  |   (  |   )  |  |   |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
  * |      |      |      |      |      |      |      |      |      |      |      |      |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
@@ -114,7 +114,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_LOWER] = LAYOUT_preonic_grid( \
   KC_TILD, KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC, KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_BSPC, \
   KC_TILD, KC_EXLM, KC_AT,   KC_HASH, KC_DLR,  KC_PERC, KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_PLUS, \
-  KC_BSPC, KC_LBRC, KC_RBRC, KC_LCBR, KC_RCBR, KC_PIPE, KC_PIPE, KC_UNDS, KC_PLUS, KC_LPRN, KC_RPRN, KC_PIPE, \
+  KC_BSPC, KC_LBRC, KC_RBRC, KC_LCBR, KC_RCBR, KC_PIPE, KC_PIPE, KC_LPRN, KC_RPRN, KC_LPRN, KC_RPRN, KC_PIPE, \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
   _______, _______, _______, _______, _______, KC_BSPC, KC_BSPC, _______, KC_MNXT, KC_VOLD, KC_VOLU, KC_MPLY  \
 ),
