@@ -17,6 +17,10 @@
 #include QMK_KEYBOARD_H
 #include "muse.h"
 
+enum {
+  X_SCLN = 0
+};
+
 enum preonic_layers {
   _QWERTY,
   _COLEMAK,
@@ -73,7 +77,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [_QWERTY] = LAYOUT_preonic_grid( \
   KC_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_BSPC, \
   KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_MINS,  \
-  CTL_T(KC_ESC),KC_A,KC_S,   KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, LT(_NAV, KC_QUOT), \
+  CTL_T(KC_ESC),KC_A,KC_S,   KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    TD(X_SCLN), LT(_NAV, KC_QUOT), \
   KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_ENT,  \
   KC_EQL,  KC_LCTL, KC_LALT, KC_LGUI, LOWER,   KC_UNDS, KC_SPC,  RAISE,   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT  \
 ),
@@ -311,3 +315,31 @@ bool music_mask_user(uint16_t keycode) {
       return true;
   }
 }
+
+void td_semicolon_finished (qk_tap_dance_state_t *state, void *user_data) {
+  if (state->count == 1) {
+    register_code (KC_SCLN);
+  } else if (state->count == 2) {
+    register_code (KC_RSFT);
+    register_code (KC_SCLN);
+  } else if (state->count == 3) {
+    register_code (KC_RSFT);
+    register_code (KC_SCLN);
+    unregister_code (KC_SCLN);
+    register_code (KC_SCLN);
+  }
+}
+
+void td_semicolon_reset (qk_tap_dance_state_t *state, void *user_data) {
+  if (state->count == 1) {
+    unregister_code (KC_SCLN);
+  } else {
+    unregister_code (KC_RSFT);
+    unregister_code (KC_SCLN);
+  }
+}
+
+qk_tap_dance_action_t tap_dance_actions[] = {
+  [X_SCLN] = ACTION_TAP_DANCE_FN_ADVANCED (NULL, td_semicolon_finished, td_semicolon_reset)
+};
+
