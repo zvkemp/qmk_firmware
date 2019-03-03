@@ -27,7 +27,8 @@ enum preonic_layers {
   _LOWER,
   _RAISE,
   _ADJUST,
-  _NAV
+  _NAV,
+  _NUMPAD,
 };
 
 enum preonic_keycodes {
@@ -37,26 +38,23 @@ enum preonic_keycodes {
   RAISE,
   HSHRKT,
   LAMBDA,
-  NEWLN,
+  NEWLN
 };
 
 /* goals
  * [x] vim-like arrow navigation on home row
- * [x] grave-escape
  * [x] pgup/pgdn/home/end 
  *     - maybe add a layer for lower left button?
  *     - 
  * [ ] numpad?
  * [x] add more bracket pairing options
  * [ ] double-taps:
- *     - ;; -> :
- *     - ;;; -> ::
- *     - [x]  esc ctrl
- *     - modtap brackets?
- *     - double-tap brackets to insert pair?
+ *     - [x] ;; -> :
+ *     - [x] ;;; -> ::
+ *     - [x] esc ctrl
  *
- * [ ] replace delete key with minus/underscore
- * consider directional navigation from https://noahfrederick.com/log/the-planck-keyboard
+ * [x] replace delete key with minus/underscore
+ * [x] consider directional navigation from https://noahfrederick.com/log/the-planck-keyboard
  */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -71,7 +69,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |------+------+------+------+------+------|------+------+------+------+------+------|
  * | Shift|   Z  |   X  |   C  |   V  |   B  |   N  |   M  |   ,  |   .  |   /  | Ent  |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |  =   | Ctrl | Alt  | GUI  |Lower |   _  |Space |Raise | Left | Down |  Up  |Right |
+ * | Num  | Ctrl | Alt  | GUI  |Lower |   _  |Space |Raise | Left | Down |  Up  |Right |
  * `-----------------------------------------------------------------------------------'
  */
 [_QWERTY] = LAYOUT_preonic_grid( \
@@ -79,7 +77,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_MINS,  \
   CTL_T(KC_ESC),KC_A,KC_S,   KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    TD(X_SCLN), LT(_NAV, KC_QUOT), \
   KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_ENT,  \
-  KC_EQL,  KC_LCTL, KC_LALT, KC_LGUI, LOWER,   KC_UNDS, KC_SPC,  RAISE,   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT  \
+  TT(_NUMPAD),  KC_LCTL, KC_LALT, KC_LGUI, LOWER,   KC_UNDS, KC_SPC,  RAISE,   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT  \
 ),
 
 /* Colemak
@@ -92,7 +90,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |------+------+------+------+------+------|------+------+------+------+------+------|
  * | Shift|   Z  |   X  |   C  |   V  |   B  |   K  |   M  |   ,  |   .  |   /  | Ent  |
  * |------+------+------+------+------+------+------+------+------+------+------+------|
- * |  =   | Ctrl | Alt  | GUI  |Lower |   _  |Space |Raise | Left | Down |  Up  |Right |
+ * | Num  | Ctrl | Alt  | GUI  |Lower |   _  |Space |Raise | Left | Down |  Up  |Right |
  * `-----------------------------------------------------------------------------------'
  */
 [_COLEMAK] = LAYOUT_preonic_grid( \
@@ -100,7 +98,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   KC_TAB,  KC_Q,    KC_W,    KC_F,    KC_P,    KC_G,    KC_J,    KC_L,    KC_U,    KC_Y,    KC_SCLN, KC_MINS,  \
   CTL_T(KC_ESC),KC_A,KC_R,   KC_S,    KC_T,    KC_D,    KC_H,    KC_N,    KC_E,    KC_I,    KC_O,    LT(_NAV, KC_QUOT), \
   KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_K,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_ENT,  \
-  KC_EQL,  KC_LCTL, KC_LALT, KC_LGUI, LOWER,   KC_UNDS, KC_SPC,  RAISE,   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT  \
+  TT(_NUMPAD),  KC_LCTL, KC_LALT, KC_LGUI, LOWER,   KC_UNDS, KC_SPC,  RAISE,   KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT  \
 ),
 
 /* Lower
@@ -164,6 +162,27 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   _______, _______, _______, _______, _______, _______, KC_LEFT, KC_DOWN,   KC_UP, KC_RGHT, _______, _______, \
   _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
   _______, _______, _______, _______, _______, _______, _______, _______, KC_HOME, KC_PGDN, KC_PGUP, KC_END   \
+),
+
+/* Numpad (planck-compatible)
+ * ,-----------------------------------------------------------------------------------.
+ * |      |      |      |      |      |      |      |      |      |      |      |      |
+ * |-----------------------------------------------------------------------------------|
+ * |      |      |      |      |      |      |      |  7   |  8   |  9   |      |      |
+ * |------+------+------+------+------+------+------+------+------+------+------+------|
+ * |      |      |      |      |      |      |      |  4   |  5   |  6   |      |      |
+ * |------+------+------+------+------+------+------+------+------+------+------+------|
+ * |      |      |      |      |      |      |      |  1   |  2   |  3   |      |      |
+ * |------+------+------+------+------+------+------+------+------+------+------+------|
+ * |      |      |      |      |      |      |      |      |  0   |  0   |      |      |
+ * `-----------------------------------------------------------------------------------'
+ */
+[_NUMPAD] = LAYOUT_preonic_grid( \
+  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, \
+  _______, _______, _______, _______, _______, _______, _______,    KC_7,    KC_8,    KC_9, _______, _______, \
+  _______, _______, _______, _______, _______, _______, _______,    KC_4,    KC_5,    KC_6, _______, _______, \
+  _______, _______, _______, _______, _______, _______, _______,    KC_1,    KC_2,    KC_3, _______, _______, \
+  _______, _______, _______, _______, _______, _______, _______, _______,    KC_0,    KC_0, _______, _______  \
 ),
 
 /* Adjust (Lower + Raise)
