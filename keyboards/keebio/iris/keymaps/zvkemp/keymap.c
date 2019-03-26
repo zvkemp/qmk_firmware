@@ -19,6 +19,21 @@ enum custom_keycodes {
   NEWLN,
 };
 
+enum td_keycodes {
+  TD_SH_UND = 0
+};
+
+typedef enum {
+  SINGLE_TAP,
+  SINGLE_HOLD
+} td_state_t;
+
+static td_state_t td_state;
+
+int cur_dance(qk_tap_dance_state_t *state);
+void td_sh_und_finished (qk_tap_dance_state_t *state, void *user_data);
+void td_sh_und_reset (qk_tap_dance_state_t *state, void *user_data);
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_QWERTY] = LAYOUT(
@@ -31,7 +46,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
      KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_LALT,          KC_LCTRL,KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_ENT,
   //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                                    KC_LGUI, LOWER,   KC_UNDS,                   KC_SPC,  RAISE,   LT(_MOUSE, KC_BSPC)
+                                    KC_LGUI, LOWER,   TD(TD_SH_UND),                   KC_SPC,  RAISE,   LT(_MOUSE, KC_BSPC)
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
   ),
 
@@ -154,3 +169,39 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   }
   return true;
 }
+
+int cur_dance (qk_tap_dance_state_t *state) {
+  if (state->count == 1) {
+    if (state->interrupted || !state->pressed) { return SINGLE_TAP; }
+    else { return SINGLE_HOLD; }
+  } else {
+    return 2;
+  }
+}
+
+void td_sh_und_finished (qk_tap_dance_state_t *state, void *user_data) {
+  td_state = cur_dance(state);
+  switch (td_state) {
+    case SINGLE_TAP:
+      register_code16(KC_UNDS);
+      break;
+    case SINGLE_HOLD:
+      register_mods(MOD_BIT(KC_LSFT));
+      break;
+  }
+}
+
+void td_sh_und_reset (qk_tap_dance_state_t *state, void *user_data) {
+  switch (td_state) {
+    case SINGLE_TAP:
+      unregister_code16(KC_UNDS);
+      break;
+    case SINGLE_HOLD:
+      unregister_mods(MOD_BIT(KC_LSFT));
+      break;
+  }
+}
+
+qk_tap_dance_action_t tap_dance_actions[] = {
+  [TD_SH_UND] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, td_sh_und_finished, td_sh_und_reset)
+};
