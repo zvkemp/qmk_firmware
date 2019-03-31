@@ -19,6 +19,7 @@ enum custom_keycodes {
   NEWLN,
 };
 
+/*
 enum td_keycodes {
   TD_SH_UND = 0
 };
@@ -33,6 +34,7 @@ static td_state_t td_state;
 int cur_dance(qk_tap_dance_state_t *state);
 void td_sh_und_finished (qk_tap_dance_state_t *state, void *user_data);
 void td_sh_und_reset (qk_tap_dance_state_t *state, void *user_data);
+*/
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -170,6 +172,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
+/*
 int cur_dance (qk_tap_dance_state_t *state) {
   if (state->count == 1) {
     if (state->interrupted || !state->pressed) { return SINGLE_TAP; }
@@ -205,3 +208,4 @@ void td_sh_und_reset (qk_tap_dance_state_t *state, void *user_data) {
 qk_tap_dance_action_t tap_dance_actions[] = {
   [TD_SH_UND] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, td_sh_und_finished, td_sh_und_reset)
 };
+*/
