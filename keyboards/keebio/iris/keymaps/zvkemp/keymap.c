@@ -9,6 +9,11 @@ extern keymap_config_t keymap_config;
 #define _MOUSE 4
 #define _ADJUST 16
 
+#define MSPC LT(_MOUSE, KC_BSPC)
+#define CESC CTL_T(KC_ESC)
+#define NQUO LT(_NAV, KC_QUOT)
+
+
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
   LOWER,
@@ -35,7 +40,6 @@ int cur_dance(qk_tap_dance_state_t *state);
 void td_sh_und_finished (qk_tap_dance_state_t *state, void *user_data);
 void td_sh_und_reset (qk_tap_dance_state_t *state, void *user_data);
 */
-
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_QWERTY] = LAYOUT(
@@ -44,11 +48,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
      KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                               KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_MINS,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-  CTL_T(KC_ESC),KC_A,  KC_S,    KC_D,    KC_F,    KC_G,                               KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, LT(_NAV, KC_QUOT),
+     CESC,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                               KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, NQUO    ,
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
      KC_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_LALT,          KC_LCTRL,KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, KC_ENT,
   //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                                    KC_LGUI, LOWER,   KC_UNDS,                   KC_SPC,  RAISE,   LT(_MOUSE, KC_BSPC)
+                                    KC_LGUI, LOWER,   KC_UNDS,                   KC_SPC,  RAISE,   MSPC 
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
   ),
 
