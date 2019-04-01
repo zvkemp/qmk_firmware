@@ -148,8 +148,6 @@ class Keymap
     ?8 => :KC_8,
     ?9 => :KC_9,
     ?0 => :KC_0,
-    "BSPC" => :KC_BSPC,
-    "TAB" => :KC_TAB,
     ?Q => :KC_Q,
     ?W => :KC_W,
     ?E => :KC_E,
@@ -176,17 +174,20 @@ class Keymap
     ?B => :KC_B,
     ?N => :KC_N,
     ?M => :KC_M,
-    "ALT" => :KC_LALT,
-    "CTRL" => :KC_LCTRL,
     ?- => :KC_MINS,
     ?; => :KC_SCLN,
-    "CESC" => "CESC", # FIXME: provide definition for CSEC = CTL_T(KC_ESC)
-    "NQUO" => "NQUO", # FIXME: define as LT(_NAV, KC_QUOT)
-    "MSPC" => "MSPC", # FIXME: define as LT(_MOUSE, KC_BSPC)
-    "LSFT" => :KC_LSFT,
     ?, => :KC_COMM,
     ?. => :KC_DOT,
     ?/ => :KC_SLSH,
+    "BSPC" => :KC_BSPC,
+    "TAB" => :KC_TAB,
+    "ALT" => :KC_LALT,
+    "CTRL" => :KC_LCTRL,
+    "CESC" => "CESC", # FIXME: provide definition for CSEC = CTL_T(KC_ESC)
+    "NQUO" => "NQUO", # FIXME: define as LT(_NAV, KC_QUOT)
+    "MSPC" => "MSPC", # FIXME: define as LT(_MOUSE, KC_BSPC)
+    "ASPC" => "ASPC", # FIXME: define as mod-tap alt/backspace
+    "LSFT" => :KC_LSFT,
     "ENT" => :KC_ENT,
     "META" => :KC_LGUI,
     "LW" => :LOWER,
@@ -201,7 +202,7 @@ class Keymap
     "HOME" => :KC_HOME,
     "PGDN" => :KC_PGDN,
     "PGUP" => :KC_PGUP,
-    "END" => :END,
+    "END" => :KC_END,
     ?_ => BLANK,
     ?~ => "KC_TILD",
     ?! => "KC_EXLM",
@@ -235,21 +236,18 @@ class Keymap
     "MUT" => :KC_MUTE
   }
 
-  class << self
-    # FIXME: adjust, nav, and mouse layers
-    def method_missing(layer, *args, &block)
-      self.new.to_a(layer, *args, &block)
-    end
-  end
-
   def initialize
     @config = base_config
   end
 
   attr_reader :config
 
-  # FIXME: call this something else
-  def to_a(layer = :base, overrides: {}, thumb_cluster: {}, thumb_cluster_mapping: {})
+  def to_h(layer = :base, overrides: {}, thumb_cluster: {}, thumb_cluster_mapping: {})
+    # overrides can be given as an array of hashes or a single hash.
+    if overrides.is_a?(Array)
+      overrides = overrides.inject(:merge)
+    end
+
     defaults = config.fetch(layer).tap do |result|
       overrides.each do |(row, col), kc|
         result[row][col] = Key.new(kc, 0)
@@ -271,16 +269,6 @@ class Keymap
     { defaults: defaults, thumb_cluster: mapped_thumb_cluster }
   end
 
-  def to_s(layer = :base)
-    res = ["// #@key #{layer}"]
-    config.fetch(layer).each do |row|
-      res << render(row)
-    end
-
-    # FIXME: strip trailing comma from last row
-    res.join("\n")
-  end
-
   private
 
   def render(row)
@@ -293,10 +281,10 @@ class Keymap
 
   def base_config
     {
-      base: adjust(QWERTY),
+      base:  adjust(QWERTY),
       lower: adjust(LOWER),
       raise: adjust(RAISE),
-      nav: adjust(NAV),
+      nav:   adjust(NAV),
     }
   end
 
@@ -347,12 +335,7 @@ class Keymap
   ].each(&:freeze).freeze
 end
 
-# puts Keymap.new(:preonic).to_s(:base)
-# puts Keymap.new(:preonic).to_s(:lower)
-# puts Keymap.new(:preonic).to_s(:raise)
-
-# puts Keymap.new(:iris).to_s(:base)
-layout = Keymap.new.to_a(:lower)
+ROW_1_BACKSPACE = { [1, 11] => "BSPC" }
 
 CONFIGS = {
   preonic: {
@@ -422,7 +405,7 @@ CONFIGS = {
       [4, 8] => [2, 3],
     },
     layers: {
-      base: { overrides: { [1, 11] => 'BSPC' } },
+      base: { overrides: ROW_1_BACKSPACE },
       lower: {},
       raise: {},
       nav: {},
@@ -432,10 +415,23 @@ CONFIGS = {
   corne: {
     template: Templates::CORNE,
     layers: {
-      base: { overrides: {[1, 11] => 'BSPC'} },
+      # TODO: mouse keys
+      base: {
+        overrides: [
+          ROW_1_BACKSPACE,
+          { [4, 8] => "ASPC" }
+        ]
+      },
       lower: {},
       raise: {},
-      nav: {},
+      nav: {
+        overrides: {
+          [3, 5] => "HOME",
+          [4, 5] => "END",
+          [3, 6] => "PGUP",
+          [4, 6] => "PGDN"
+        }
+      },
     }
   }
 }
@@ -453,7 +449,7 @@ configs.each do |name, config|
   end
 
   layers.each do |key, layer|
-    layout = Keymap.new.to_a(key, **layer, **config.slice(:thumb_cluster_mapping))
+    layout = Keymap.new.to_h(key, **layer, **config.slice(:thumb_cluster_mapping))
     puts "// #{name}:#{key}"
     puts TemplateRenderer.new(
       config[:template],
