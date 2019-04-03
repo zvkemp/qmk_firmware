@@ -233,7 +233,9 @@ class Keymap
     '->' => :LAMBDA,
     '=>' => :HSHRKT,
     "DEL" => :KC_DEL,
-    "MUT" => :KC_MUTE
+    "MUT" => :KC_MUTE,
+    "ZO" => :_______, # FIXME: anyway to negotiate ctrl/cmd codes for CTRL-- and CTRL-+?
+    "ZI" => :_______,
   }
 
   def initialize
@@ -316,7 +318,7 @@ class Keymap
   LOWER = [ %w[~     !  @  #  $  %    ^  &  *  (  )  _],
             %w[~     !  @  #  $  %    ^  &  *  (  )  +],
             %w[BSPC \[ \]  {  }  |    |  (  )  _  :  "],
-            %w[_     _  _  _  _ TMUX \n  =  +  -  ?  _],
+            %w[_     ZO ZI _  _ TMUX \n  =  +  -  ?  _],
             %w[_     _  _  _  _  _    _  _  _  _  _  _],
   ].each(&:freeze).freeze
 
