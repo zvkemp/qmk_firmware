@@ -183,10 +183,6 @@ class Keymap
     "TAB" => :KC_TAB,
     "ALT" => :KC_LALT,
     "CTRL" => :KC_LCTRL,
-    "CESC" => "CESC", # FIXME: provide definition for CSEC = CTL_T(KC_ESC)
-    "NQUO" => "NQUO", # FIXME: define as LT(_NAV, KC_QUOT)
-    "MSPC" => "MSPC", # FIXME: define as LT(_MOUSE, KC_BSPC)
-    "ASPC" => "ASPC", # FIXME: define as mod-tap alt/backspace
     "LSFT" => :KC_LSFT,
     "ENT" => :KC_ENT,
     "META" => :KC_LGUI,
@@ -194,7 +190,6 @@ class Keymap
     "UNDS" => :KC_UNDS,
     "SPC" => :KC_SPC,
     "RS" => :RAISE,
-    "MSE" => "LT(_MOUSE, KC_BSPC)",
     "LEFT" => "KC_LEFT",
     "DOWN" => "KC_DOWN",
     "UP" => "KC_UP",
@@ -223,20 +218,75 @@ class Keymap
     ?| => "KC_PIPE",
     ?: => "KC_COLN",
     ?" => "KC_DQUO",
-    "TMUX" => "C(KC_B)",
     '\n' => :NEWLN,
     ?= => :KC_EQL,
     ?? => :KC_QUES,
     "VU" => :KC_VOLU,
     "VD" => :KC_VOLD,
     "\\" => :KC_BSLS,
-    '->' => :LAMBDA,
-    '=>' => :HSHRKT,
     "DEL" => :KC_DEL,
     "MUT" => :KC_MUTE,
-    "ZO" => :_______, # FIXME: anyway to negotiate ctrl/cmd codes for CTRL-- and CTRL-+?
-    "ZI" => :_______,
+    "MSD" => "KC_MS_D",
+    "MSR" => "KC_MS_R",
+    "MSL" => "KC_MS_L",
+    "MSU" => "KC_MS_U",
+    "B1"  => "KC_BTN1",
+    "B2"  => "KC_BTN2",
+    "B3"  => "KC_BTN3",
+    "F1"  => "KC_F1",
+    "F2"  => "KC_F2",
+    "F3"  => "KC_F3",
+    "F4"  => "KC_F4",
+    "F5"  => "KC_F5",
+    "F6"  => "KC_F6",
+    "F7"  => "KC_F7",
+    "F8"  => "KC_F8",
+    "F9"  => "KC_F9",
+    "F10"  => "KC_F10",
+    "F11"  => "KC_F11",
+    "F12"  => "KC_F12",
+
+    # keycodes for send_string
+    '->' => :LAMBDA,
+    '=>' => :HSHRKT,
   }
+
+  # FIXME: export these as defines
+  CUSTOM = {
+    "CESC" => "CTL_T(KC_ESC)",
+    "NQUO" => "LT(_NAV, KC_QUOT)",
+    "MSPC" => "LT(_MOUSE, KC_BSPC)",
+    "ASPC" => "ALT_T(KC_BSPC)",
+    "TMUX" => "C(KC_B)",
+    "ZI" => [:TZM_IN, "LCTL(LSFT(KC_EQL))"],
+    "ZO" => [:TZM_OUT, "LCTL(LSFT(KC_MINS))"],
+
+    # Spectacle (mac only)
+    "SW" => [:SPECW, "KC_F9"],
+    "SL" => [:SPECL, "LCTL(LGUI(KC_LEFT))"],
+    "SF" => [:SPECF, "LCTL(LGUI(KC_UP))"],
+    "SR" => [:SPECR, "LCTL(LGUI(KC_RIGHT))"],
+  }
+
+  CustomKeycode = Struct.new(:name, :definition) do
+    def to_s
+      name.to_s
+    end
+
+    def define
+      "#define #{name} #{definition}"
+    end
+  end
+
+  def self.try_fetch_custom(code)
+    name, definition = CUSTOM.fetch(code)
+    if !definition
+      definition = name
+      name = code
+    end
+
+    CustomKeycode.new(name, definition)
+  end
 
   def initialize
     @config = base_config
@@ -273,26 +323,30 @@ class Keymap
 
   private
 
-  def render(row)
-    row.map(&:to_s).join
-  end
-
-  def keycode(kc)
-    KEYCODES.fetch(kc)
-  end
-
   def base_config
     {
       base:  adjust(QWERTY),
       lower: adjust(LOWER),
       raise: adjust(RAISE),
       nav:   adjust(NAV),
+      mouse: adjust(MOUSE),
+      adjust: adjust(ADJUST),
     }
   end
 
   Key = Struct.new(:code, :leader_space) do
     def to_s
-      KEYCODES.fetch(code).to_s
+      KEYCODES.fetch(code) { try_fetch_custom }.to_s
+    end
+
+    def define
+      nil
+    end
+
+    private
+
+    def try_fetch_custom
+      Keymap.try_fetch_custom(code)
     end
   end
 
@@ -301,7 +355,7 @@ class Keymap
 
     keymap.each do |row|
       rows << row.map do |code|
-        Key.new(code, 0)
+        Key.new(code)
       end
     end
 
@@ -312,9 +366,11 @@ class Keymap
              %w[TAB  Q    W    E    R    T    Y    U    I    O    P    -],
              %w[CESC A    S    D    F    G    H    J    K    L    ;    NQUO],
              %w[LSFT Z    X    C    V    B    N    M    ,    .    /    ENT],
-             %w[_    CTRL ALT  META RS   UNDS SPC  LW   LEFT DOWN UP   RIGHT],
+             %w[_    CTRL ALT  META LW   UNDS SPC  RS   LEFT DOWN UP   RIGHT],
   ].each(&:freeze).freeze
 
+  # FIXME: the BSPC overriding escape/ctrl here can be unwieldy, and
+  # I've probably never used it
   LOWER = [ %w[~     !  @  #  $  %    ^  &  *  (  )  _],
             %w[~     !  @  #  $  %    ^  &  *  (  )  +],
             %w[BSPC \[ \]  {  }  |    |  (  )  _  :  "],
@@ -329,11 +385,26 @@ class Keymap
             %w[_   _ _ _ _   BSPC DEL _  _  _  _  _],
   ].each(&:freeze).freeze
 
-  NAV =   [ %w[_ _ _ _ _ _ _ _ _ _ _ _],
-            %w[_ _ _ _ _ _ _ _ _ _ _ _],
-            %w[_ _ _ _ _ _ LEFT DOWN UP RIGHT _ _],
-            %w[_ _ _ _ _ _ _ _ _ _ _ _],
-            %w[_ _ _ _ _ _ _ _ _ _ _ _],
+  NAV =   [ %w[_   _   _   _   _   _   _   _   _   _   _   _],
+            %w[_   _   SW  _   _   _   _   _   _   _   _   _],
+            %w[_   SL  SF  SR  _   _ LEFT DOWN UP RIGHT _  _],
+            %w[_   ZI  ZO  _   _   _   _   _   _   _   _   _],
+            %w[_   _   _   _   _   _   _   _   _   _   _   _],
+  ].each(&:freeze).freeze
+
+  MOUSE = [ %w[_   _   _   _   _   _   _   _   _   _   _   _],
+            %w[_   _   _   _   _   _   _   _  MSU  _   _   _],
+            %w[_   _   _   _   _   _   _  MSL MSD MSR  _   _],
+            # FIXME: this button layout doesn't make sense on a non-split keyboard
+            %w[_   _   _   _   _   B3  B3  _   _   _   _   _],
+            %w[_   _   _   _   _   B1  B1  _   _   _   _   _],
+  ].each(&:freeze).freeze
+
+  ADJUST = [%w[_   F1  F2  F3  F4  F5  F6  F7  F8  F9  F10 F11],
+            %w[_   _   _   _   _   _   _   _   _   _   _   F12],
+            %w[_   _   _   _   _   _   _   _   _   _   _   _],
+            %w[_   _   _   _   _   _   _   _   _   _   _   _],
+            %w[_   _   _   _   _   _   _   _   _   _   _   _],
   ].each(&:freeze).freeze
 end
 
@@ -377,6 +448,14 @@ CONFIGS = {
           [1, 2] => "END",  [1, 3] => "PGDN",
         }
       },
+      adjust: {
+        thumb_cluster: {
+          [0, 1] => "VU",
+          [1, 3] => "VD",
+        }
+
+      },
+      mouse: { thumb_cluster: { [0, 0] => "B2", [0, 1] => "B2" }},
     },
     # See Template for which thumb keys belong to the cluster.
     # Generally, if the key has a cognate with the standard
@@ -440,6 +519,21 @@ CONFIGS = {
 
 name, * = ARGV
 _, *selected_layers = ARGV
+
+if name == "defs"
+  Keymap::CUSTOM.each do |key, config|
+    name, definition = config
+
+    unless definition
+      definition = name
+      name = key
+    end
+
+    puts Keymap::CustomKeycode.new(name, definition).define
+  end
+
+  exit(0)
+end
 
 configs = name ? CONFIGS.slice(name.to_sym) : CONFIGS
 configs.each do |name, config|
