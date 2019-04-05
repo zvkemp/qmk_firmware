@@ -245,10 +245,12 @@ class Keymap
     "F10"  => "KC_F10",
     "F11"  => "KC_F11",
     "F12"  => "KC_F12",
+    "RESET" => :RESET,
 
     # keycodes for send_string
     '->' => :LAMBDA,
     '=>' => :HSHRKT,
+
   }
 
   # FIXME: export these as defines
@@ -401,7 +403,7 @@ class Keymap
   ].each(&:freeze).freeze
 
   ADJUST = [%w[_   F1  F2  F3  F4  F5  F6  F7  F8  F9  F10 F11],
-            %w[_   _   _   _   _   _   _   _   _   _   _   F12],
+            %w[_ RESET _   _   _   _   _   _   _   _   _   F12],
             %w[_   _   _   _   _   _   _   _   _   _   _   _],
             %w[_   _   _   _   _   _   _   _   _   _   _   _],
             %w[_   _   _   _   _   _   _   _   _   _   _   _],
@@ -513,8 +515,11 @@ CONFIGS = {
           { [4, 8] => "ASPC" }
         ]
       },
-      lower: {},
+      lower: {
+        overrides: ROW_1_BACKSPACE
+      },
       raise: {},
+      adjust: {},
       nav: {
         overrides: {
           [3, 5] => "HOME",
