@@ -63,6 +63,8 @@ enum macro_keycodes {
 #define SPECF LCTL(LGUI(KC_UP))
 #define SPECR LCTL(LGUI(KC_RIGHT))
 
+#include "layouts/raise.h"
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_QWERTY] = LAYOUT( \
 // corne:base
@@ -90,18 +92,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //                               └────────┴────────┴────────┘                 └────────┴────────┴────────┘
   ),
 
-  [_RAISE] = LAYOUT( \
-// corne:raise
-//┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
-   KC_GRV  ,KC_1    ,KC_2    ,KC_3    ,KC_4    ,KC_5    ,                           KC_6    ,KC_7    ,KC_8    ,KC_9    ,KC_0    ,_______ ,
-//├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-   _______ ,_______ ,_______ ,KC_VOLU ,_______ ,_______ ,                           _______ ,KC_MINS ,KC_EQL  ,_______ ,KC_COLN ,KC_BSLS ,
-//├────────┼────────┼────────┼────────┼────────┼────────┤                          ┌────────┼────────┼────────┼────────┼────────┼────────┤
-   KC_MUTE ,_______ ,_______ ,KC_VOLD ,_______ ,_______ ,                           _______ ,_______ ,_______ ,LAMBDA  ,HSHRKT  ,_______ ,
-//└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┐                 ┌────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                                  _______ ,_______ ,KC_BSPC ,                  KC_DEL  ,_______ ,_______ 
-//                               └────────┴────────┴────────┘                 └────────┴────────┴────────┘
-  ),
+  [_RAISE] = CRKRS, 
 
   [_NAV] = LAYOUT( \
 // corne:nav
@@ -177,7 +168,7 @@ void matrix_scan_user(void) {
 }
 
 void matrix_render_user(struct CharacterMatrix *matrix) {
-  if (is_master) {
+  /* if (is_master) { */
     // If you want to change the display of OLED, you need to change here
     matrix_write_ln(matrix, read_layer_state());
     matrix_write_ln(matrix, read_keylog());
@@ -185,9 +176,9 @@ void matrix_render_user(struct CharacterMatrix *matrix) {
     //matrix_write_ln(matrix, read_mode_icon(keymap_config.swap_lalt_lgui));
     //matrix_write_ln(matrix, read_host_led_state());
     //matrix_write_ln(matrix, read_timelog());
-  } else {
-    matrix_write(matrix, read_logo());
-  }
+  /* } else { */
+  /*   matrix_write(matrix, read_logo()); */
+  /* } */
 }
 
 void matrix_update(struct CharacterMatrix *dest, const struct CharacterMatrix *source) {
@@ -261,3 +252,38 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
+// layer state
+#define L_BASE 0
+#define L_LOWER 8
+#define L_RAISE 16
+#define L_NAV 32
+#define L_ADJUST 65536
+#define L_ADJUST_TRI 65560
+
+char layer_state_str[24];
+
+const char *read_layer_state(void) {
+  switch (layer_state)
+  {
+  case L_BASE:
+    snprintf(layer_state_str, sizeof(layer_state_str), "          DEFAULT");
+    break;
+  case L_RAISE:
+    snprintf(layer_state_str, sizeof(layer_state_str), "          RAISE");
+    break;
+  case L_LOWER:
+    snprintf(layer_state_str, sizeof(layer_state_str), "          LOWER");
+    break;
+  case L_NAV:
+    snprintf(layer_state_str, sizeof(layer_state_str), "          NAV");
+    break;
+  case L_ADJUST:
+  case L_ADJUST_TRI:
+    snprintf(layer_state_str, sizeof(layer_state_str), "          ADJUST");
+    break;
+  default:
+    snprintf(layer_state_str, sizeof(layer_state_str), "        LAYER-%ld", layer_state);
+  }
+
+  return layer_state_str;
+}

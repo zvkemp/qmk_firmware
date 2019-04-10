@@ -221,11 +221,11 @@ class Keymap
     '\n' => :NEWLN,
     ?= => :KC_EQL,
     ?? => :KC_QUES,
-    "VU" => :KC_VOLU,
-    "VD" => :KC_VOLD,
+    "VU" => :KC__VOLUP,
+    "VD" => :KC__VOLDOWN,
     "\\" => :KC_BSLS,
     "DEL" => :KC_DEL,
-    "MUT" => :KC_MUTE,
+    "MUT" => :KC__MUTE,
     "MSD" => "KC_MS_D",
     "MSR" => "KC_MS_R",
     "MSL" => "KC_MS_L",
@@ -532,8 +532,31 @@ CONFIGS = {
   }
 }
 
-name, * = ARGV
-_, *selected_layers = ARGV
+CONFIGS[:crkbd] = CONFIGS[:corne]
+
+def render(name:, config:, selected_layers: [], render_opts: {})
+  puts "\n"
+
+  output = render_opts[:io] || $stdout
+  header_mode = render_opts[:headers]
+
+  layers = config[:layers]
+  if selected_layers.any?
+    layers = layers.slice(*selected_layers.map(&:to_sym))
+  end
+
+  layers.each do |key, layer|
+    layout = Keymap.new.to_h(key, **layer, **config.slice(:thumb_cluster_mapping))
+
+    output.puts "// #{name}:#{key}"
+    output.puts TemplateRenderer.new(
+      config[:template],
+      layout: layout,
+    ).render
+  end
+end
+
+name, *selected_layers = ARGV
 
 if name == "defs"
   Keymap::CUSTOM.each do |key, config|
@@ -550,21 +573,12 @@ if name == "defs"
   exit(0)
 end
 
+if name == "header"
+  name, *selected_layers = ARGV.drop(1)
+  exit(0)
+end
+
 configs = name ? CONFIGS.slice(name.to_sym) : CONFIGS
 configs.each do |name, config|
-  puts "\n"
-
-  layers = config[:layers]
-  if selected_layers.any?
-    layers = layers.slice(*selected_layers.map(&:to_sym))
-  end
-
-  layers.each do |key, layer|
-    layout = Keymap.new.to_h(key, **layer, **config.slice(:thumb_cluster_mapping))
-    puts "// #{name}:#{key}"
-    puts TemplateRenderer.new(
-      config[:template],
-      layout: layout,
-    ).render
-  end
+  render(name: name, config: config, selected_layers: selected_layers)
 end
