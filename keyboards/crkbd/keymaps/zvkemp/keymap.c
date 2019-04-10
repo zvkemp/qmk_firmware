@@ -8,6 +8,7 @@
   #include "ssd1306.h"
 #endif
 
+#include "generated.h"
 extern keymap_config_t keymap_config;
 
 #ifdef RGBLIGHT_ENABLE
@@ -51,84 +52,12 @@ enum macro_keycodes {
 #define KC_GUIEI GUI_T(KC_LANG2)
 #define KC_ALTKN ALT_T(KC_LANG1)
 
-#define CESC CTL_T(KC_ESC)
-#define NQUO LT(_NAV, KC_QUOT)
-#define MSPC LT(_MOUSE, KC_BSPC)
-#define ASPC ALT_T(KC_BSPC)
-#define TMUX C(KC_B)
-#define TZM_IN LCTL(LSFT(KC_EQL))
-#define TZM_OUT LCTL(LSFT(KC_MINS))
-#define SPECW KC_F9
-#define SPECL LCTL(LGUI(KC_LEFT))
-#define SPECF LCTL(LGUI(KC_UP))
-#define SPECR LCTL(LGUI(KC_RIGHT))
-
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-  [_QWERTY] = LAYOUT( \
-// corne:base
-//┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
-   KC_TAB  ,KC_Q    ,KC_W    ,KC_E    ,KC_R    ,KC_T    ,                           KC_Y    ,KC_U    ,KC_I    ,KC_O    ,KC_P    ,KC_BSPC ,
-//├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-   CESC    ,KC_A    ,KC_S    ,KC_D    ,KC_F    ,KC_G    ,                           KC_H    ,KC_J    ,KC_K    ,KC_L    ,KC_SCLN ,NQUO    ,
-//├────────┼────────┼────────┼────────┼────────┼────────┤                          ┌────────┼────────┼────────┼────────┼────────┼────────┤
-   KC_LSFT ,KC_Z    ,KC_X    ,KC_C    ,KC_V    ,KC_B    ,                           KC_N    ,KC_M    ,KC_COMM ,KC_DOT  ,KC_SLSH ,KC_ENT  ,
-//└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┐                 ┌────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                                  KC_LGUI ,LOWER   ,KC_UNDS ,                  KC_SPC  ,RAISE   ,ASPC    
-//                               └────────┴────────┴────────┘                 └────────┴────────┴────────┘
-  ),
-
-  [_LOWER] = LAYOUT( \
-// corne:lower
-//┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
-   KC_TILD ,KC_EXLM ,KC_AT   ,KC_HASH ,KC_DLR  ,KC_PERC ,                           KC_CIRC ,KC_AMPR ,KC_ASTR ,KC_LPRN ,KC_RPRN ,KC_BSPC ,
-//├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-   KC_BSPC ,KC_LBRC ,KC_RBRC ,KC_LCBR ,KC_RCBR ,KC_PIPE ,                           KC_PIPE ,KC_LPRN ,KC_RPRN ,_______ ,KC_COLN ,KC_DQUO ,
-//├────────┼────────┼────────┼────────┼────────┼────────┤                          ┌────────┼────────┼────────┼────────┼────────┼────────┤
-   _______ ,TZM_OUT ,TZM_IN  ,_______ ,_______ ,TMUX    ,                           NEWLN   ,KC_EQL  ,KC_PLUS ,KC_MINS ,KC_QUES ,_______ ,
-//└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┐                 ┌────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                                  _______ ,_______ ,_______ ,                  _______ ,_______ ,_______ 
-//                               └────────┴────────┴────────┘                 └────────┴────────┴────────┘
-  ),
-
-  [_RAISE] = LAYOUT( \
-// corne:raise
-//┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
-   KC_GRV  ,KC_1    ,KC_2    ,KC_3    ,KC_4    ,KC_5    ,                           KC_6    ,KC_7    ,KC_8    ,KC_9    ,KC_0    ,_______ ,
-//├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-   _______ ,_______ ,_______ ,KC_VOLU ,_______ ,_______ ,                           _______ ,KC_MINS ,KC_EQL  ,_______ ,KC_COLN ,KC_BSLS ,
-//├────────┼────────┼────────┼────────┼────────┼────────┤                          ┌────────┼────────┼────────┼────────┼────────┼────────┤
-   KC_MUTE ,_______ ,_______ ,KC_VOLD ,_______ ,_______ ,                           _______ ,_______ ,_______ ,LAMBDA  ,HSHRKT  ,_______ ,
-//└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┐                 ┌────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                                  _______ ,_______ ,KC_BSPC ,                  KC_DEL  ,_______ ,_______ 
-//                               └────────┴────────┴────────┘                 └────────┴────────┴────────┘
-  ),
-
-  [_NAV] = LAYOUT( \
-// corne:nav
-//┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
-   _______ ,_______ ,SPECW   ,_______ ,_______ ,_______ ,                           _______ ,_______ ,_______ ,_______ ,_______ ,_______ ,
-//├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-   _______ ,SPECL   ,SPECF   ,SPECR   ,_______ ,_______ ,                           KC_LEFT ,KC_DOWN ,KC_UP   ,KC_RIGHT,_______ ,_______ ,
-//├────────┼────────┼────────┼────────┼────────┼────────┤                          ┌────────┼────────┼────────┼────────┼────────┼────────┤
-   _______ ,TZM_IN  ,TZM_OUT ,_______ ,_______ ,KC_HOME ,                           KC_PGUP ,_______ ,_______ ,_______ ,_______ ,_______ ,
-//└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┐                 ┌────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                                  _______ ,_______ ,KC_END  ,                  KC_PGDN ,_______ ,_______ 
-//                               └────────┴────────┴────────┘                 └────────┴────────┴────────┘
-  ),
-
-  [_ADJUST] = LAYOUT( \
-// FIXME: more Fn keys
-// corne:adjust
-//┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
-   _______ ,RESET   ,_______ ,_______ ,_______ ,_______ ,                           _______ ,_______ ,_______ ,_______ ,_______ ,KC_F12  ,
-//├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-   _______ ,_______ ,_______ ,_______ ,_______ ,_______ ,                           _______ ,_______ ,_______ ,_______ ,_______ ,_______ ,
-//├────────┼────────┼────────┼────────┼────────┼────────┤                          ┌────────┼────────┼────────┼────────┼────────┼────────┤
-   _______ ,_______ ,_______ ,_______ ,_______ ,_______ ,                           _______ ,_______ ,_______ ,_______ ,_______ ,_______ ,
-//└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┐                 ┌────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                                  _______ ,_______ ,_______ ,                  _______ ,_______ ,_______ 
-//                               └────────┴────────┴────────┘                 └────────┴────────┴────────┘
-  )
+  [_QWERTY] = CRKBD__BASE,
+  [_LOWER] = CRKBD__LOWER, 
+  [_RAISE] = CRKBD__RAISE, 
+  [_NAV] = CRKBD__NAV,
+  [_ADJUST] = CRKBD__ADJUST,
 };
 
 int RGB_current_mode;
@@ -177,7 +106,7 @@ void matrix_scan_user(void) {
 }
 
 void matrix_render_user(struct CharacterMatrix *matrix) {
-  if (is_master) {
+  /* if (is_master) { */
     // If you want to change the display of OLED, you need to change here
     matrix_write_ln(matrix, read_layer_state());
     matrix_write_ln(matrix, read_keylog());
@@ -185,9 +114,9 @@ void matrix_render_user(struct CharacterMatrix *matrix) {
     //matrix_write_ln(matrix, read_mode_icon(keymap_config.swap_lalt_lgui));
     //matrix_write_ln(matrix, read_host_led_state());
     //matrix_write_ln(matrix, read_timelog());
-  } else {
-    matrix_write(matrix, read_logo());
-  }
+  /* } else { */
+  /*   matrix_write(matrix, read_logo()); */
+  /* } */
 }
 
 void matrix_update(struct CharacterMatrix *dest, const struct CharacterMatrix *source) {
@@ -261,3 +190,38 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 
+// layer state
+#define L_BASE 0
+#define L_LOWER 8
+#define L_RAISE 16
+#define L_NAV 32
+#define L_ADJUST 65536
+#define L_ADJUST_TRI 65560
+
+char layer_state_str[24];
+
+const char *read_layer_state(void) {
+  switch (layer_state)
+  {
+  case L_BASE:
+    snprintf(layer_state_str, sizeof(layer_state_str), "          DEFAULT");
+    break;
+  case L_RAISE:
+    snprintf(layer_state_str, sizeof(layer_state_str), "          RAISE");
+    break;
+  case L_LOWER:
+    snprintf(layer_state_str, sizeof(layer_state_str), "          LOWER");
+    break;
+  case L_NAV:
+    snprintf(layer_state_str, sizeof(layer_state_str), "          NAV");
+    break;
+  case L_ADJUST:
+  case L_ADJUST_TRI:
+    snprintf(layer_state_str, sizeof(layer_state_str), "          ADJUST");
+    break;
+  default:
+    snprintf(layer_state_str, sizeof(layer_state_str), "        LAYER-%ld", layer_state);
+  }
+
+  return layer_state_str;
+}

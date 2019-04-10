@@ -60,7 +60,7 @@ TMPL
 //├────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┤
    {3, 0  },{3, 1  },{3, 2  },{3, 3  },{3, 4  },{3, 5  },{3, 6  },{3, 7  },{3, 8  },{3, 9  },{3, 10 },{3, 11 },
 //├────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-   {4, 0  },{4, 1  },{4, 2  },{4, 3  },{4, 4  },{4, 5  },{4, 6  },{4, 7  },{4, 8  },{4, 9  },{4, 10 },{4, 11 },
+   {4, 0  },{4, 1  },{4, 2  },{4, 3  },{4, 4  },{4, 5  },{4, 6  },{4, 7  },{4, 8  },{4, 9  },{4, 10 },{4, 11 }
 //└────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┴────────┘
 TMPL
 
@@ -83,9 +83,10 @@ end
 class TemplateRenderer
   attr_reader :template_string
 
-  def initialize(template_string, layout:)
+  def initialize(template_string, layout:, output_headers: false)
     @template_string = template_string
     @layout = layout
+    @output_headers = output_headers
   end
 
   def render
@@ -221,11 +222,11 @@ class Keymap
     '\n' => :NEWLN,
     ?= => :KC_EQL,
     ?? => :KC_QUES,
-    "VU" => :KC_VOLU,
-    "VD" => :KC_VOLD,
+    "VU" => :KC__VOLUP,
+    "VD" => :KC__VOLDOWN,
     "\\" => :KC_BSLS,
     "DEL" => :KC_DEL,
-    "MUT" => :KC_MUTE,
+    "MUT" => :KC__MUTE,
     "MSD" => "KC_MS_D",
     "MSR" => "KC_MS_R",
     "MSL" => "KC_MS_L",
@@ -382,7 +383,7 @@ class Keymap
 
   RAISE = [ %w[`   1  2  3  4  5  6  7  8  9  0  BSPC],
             %w[`   1  2  3  4  5  6  7  8  9  0  _],
-            %w[_   _  _  VU _  _  _  -  =  _  :  \\ ],
+            %w[_   _  _  VU _  .  .  -  =  _  :  \\ ],
             %w[MUT _  _  VD _  _  _  _  _  -> => _],
             %w[_   _ _ _ _   BSPC DEL _  _  _  _  _],
   ].each(&:freeze).freeze
@@ -420,6 +421,7 @@ PREONIC_ARROW_NAV = {
 
 CONFIGS = {
   preonic: {
+    layout_macro: "LAYOUT_preonic_grid",
     template: Templates::PREONIC,
     layers: {
       base: {},
@@ -432,6 +434,7 @@ CONFIGS = {
   },
 
   iris: {
+    path: "keebio/iris",
     template: Templates::IRIS,
     # In the first pass, the Keymap will map from the row-based layout to
     # the thumb_cluster layout.
@@ -476,6 +479,7 @@ CONFIGS = {
   },
 
   nyquist: {
+    path: "keebio/nyquist",
     template: Templates::NYQUIST,
     layers: {
       base: {},
@@ -489,6 +493,7 @@ CONFIGS = {
 
   gergo: {
     template: Templates::GERGO,
+    layout_macro: "LAYOUT_GERGO",
     thumb_cluster_mapping: {
       [4, 3] => [2, 0],
       [4, 4] => [2, 1],
@@ -532,27 +537,14 @@ CONFIGS = {
   }
 }
 
-name, * = ARGV
-_, *selected_layers = ARGV
+CONFIGS[:crkbd] = CONFIGS[:corne]
 
-if name == "defs"
-  Keymap::CUSTOM.each do |key, config|
-    name, definition = config
-
-    unless definition
-      definition = name
-      name = key
-    end
-
-    puts Keymap::CustomKeycode.new(name, definition).define
-  end
-
-  exit(0)
-end
-
-configs = name ? CONFIGS.slice(name.to_sym) : CONFIGS
-configs.each do |name, config|
+def render(name:, config:, selected_layers: [], render_opts: {})
   puts "\n"
+
+  output = render_opts[:io] || $stdout
+  header_mode = render_opts[:output_headers]
+  layout_macro = config.fetch(:layout_macro, "LAYOUT")
 
   layers = config[:layers]
   if selected_layers.any?
@@ -561,10 +553,60 @@ configs.each do |name, config|
 
   layers.each do |key, layer|
     layout = Keymap.new.to_h(key, **layer, **config.slice(:thumb_cluster_mapping))
-    puts "// #{name}:#{key}"
-    puts TemplateRenderer.new(
+
+    output.puts (header_mode ? "#define #{name.upcase}__#{key.upcase} #{layout_macro}( \\" : "// #{name}:#{key}")
+    TemplateRenderer.new(
       config[:template],
       layout: layout,
-    ).render
+      **render_opts.slice(:output_headers)
+    ).render.lines.each do |line|
+      if header_mode
+        next if line.strip.start_with?('//')
+        output.puts "#{line.split(',').map(&:strip).join(',')} \\"
+      else
+        output.puts line
+      end
+    end
+
+    output.puts ")" if header_mode
   end
+end
+
+def save_header_file(name:, config:, selected_layers: [], render_opts: {})
+  keyboard_path = config.fetch(:path, name)
+  file = File.open(File.expand_path("../keyboards/#{keyboard_path}/keymaps/zvkemp/generated.h", __FILE__), "w")
+
+  Keymap::CUSTOM.each do |key, config; name|
+    name, definition = config
+
+    unless definition
+      definition = name
+      name = key
+    end
+
+    file.puts Keymap::CustomKeycode.new(name, definition).define
+  end
+
+  render(
+    name: name,
+    config: config,
+    selected_layers: selected_layers,
+    render_opts: render_opts.merge(io: file, output_headers: true)
+  )
+
+  file.close
+end
+
+name, *selected_layers = ARGV
+
+if name == "header"
+  name, *selected_layers = ARGV.drop(1)
+  config = CONFIGS.fetch(name.to_sym)
+  save_header_file(name: name, config: config, selected_layers: selected_layers)
+  exit(0)
+end
+
+configs = name ? CONFIGS.slice(name.to_sym) : CONFIGS
+configs.each do |name, config|
+  render(name: name, config: config, selected_layers: selected_layers)
 end
