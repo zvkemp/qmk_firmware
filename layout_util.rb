@@ -377,7 +377,7 @@ class Keymap
   LOWER = [ %w[~     !  @  #  $  %    ^  &  *  (  )  _],
             %w[~     !  @  #  $  %    ^  &  *  (  )  +],
             %w[BSPC \[ \]  {  }  |    |  (  )  _  :  "],
-            %w[_     ZO ZI _  _ TMUX \n  =  +  -  ?  _],
+            %w[_     ZO ZI ~  ` TMUX \n  =  +  -  ?  _],
             %w[_     _  _  _  _  _    _  _  _  _  _  _],
   ].each(&:freeze).freeze
 

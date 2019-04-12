@@ -8,6 +8,7 @@
   #include "ssd1306.h"
 #endif
 
+/* #include "zvkemp.h" */
 #include "generated.h"
 extern keymap_config_t keymap_config;
 
@@ -43,6 +44,20 @@ enum macro_keycodes {
   KC_SAMPLEMACRO,
 };
 
+enum td_keycodes {
+  SHIFT_UNDERSCORE
+};
+
+typedef enum {
+  SINGLE_TAP,
+  SINGLE_HOLD,
+} td_state_t;
+
+static td_state_t td_state;
+int cur_dance (qk_tap_dance_state_t *state);
+void td_underscore_finished (qk_tap_dance_state_t *state, void *user_data);
+void td_underscore_reset (qk_tap_dance_state_t *state, void *user_data);
+
 #define KC______ KC_TRNS
 #define KC_XXXXX KC_NO
 #define KC_LOWER LOWER
@@ -61,6 +76,41 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 int RGB_current_mode;
+
+int cur_dance (qk_tap_dance_state_t *state) {
+  if (state->count == 1) {
+    if (!state->pressed) { return SINGLE_TAP; }
+    else { return SINGLE_HOLD; }
+  }
+
+  return 2;
+}
+
+void td_underscore_finished (qk_tap_dance_state_t *state, void *user_data) {
+  td_state = cur_dance(state);
+  switch (td_state) {
+    case SINGLE_TAP:
+      register_code16(KC_UNDS);
+      break;
+    case SINGLE_HOLD:
+      register_mods(MOD_BIT(KC_LSFT));
+      break;
+  }
+}
+
+void td_underscore_reset (qk_tap_dance_state_t *state, void *user_data) {
+  switch (td_state) {
+    case SINGLE_TAP:
+      unregister_code16(KC_UNDS);
+      break;
+    case SINGLE_HOLD:
+      unregister_mods(MOD_BIT(KC_LSFT));
+  };
+}
+
+qk_tap_dance_action_t tap_dance_actions[] = {
+  [SHIFT_UNDERSCORE] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, td_underscore_finished, td_underscore_reset, 125)
+};
 
 void persistent_default_layer_set(uint16_t default_layer) {
   eeconfig_update_default_layer(default_layer);
