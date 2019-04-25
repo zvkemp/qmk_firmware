@@ -412,6 +412,7 @@ class Keymap
 end
 
 ROW_1_BACKSPACE = { [1, 11] => "BSPC" }
+ROW_4_ALT = { [4, 8] => "ASPC" }
 PREONIC_ARROW_NAV = {
   [4, 8] => "HOME",
   [4, 9] => "PGUP",
@@ -503,7 +504,18 @@ CONFIGS = {
       [4, 8] => [2, 3],
     },
     layers: {
-      base: { overrides: ROW_1_BACKSPACE },
+      base: {
+        overrides: [
+          ROW_1_BACKSPACE,
+          ROW_4_ALT
+        ],
+        thumb_cluster: {
+          [1,0] => "`",
+          [3,1] => "CTRL",
+          [4,1] => "ENT",
+          [4,2] => "LSFT"
+        }
+      },
       lower: {},
       raise: {},
       nav: {},
@@ -517,7 +529,7 @@ CONFIGS = {
       base: {
         overrides: [
           ROW_1_BACKSPACE,
-          { [4, 8] => "ASPC" }
+          ROW_4_ALT
         ]
       },
       lower: {
